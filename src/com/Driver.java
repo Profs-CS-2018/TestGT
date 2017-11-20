@@ -1,6 +1,3 @@
-/**
- * 
- */
 package com;
 
 import javax.swing.JFrame;
@@ -18,9 +15,6 @@ public class Driver {
 	    {
 		    String test_generator = "Unit Test Generator";
 	        Frame frame = new Frame(test_generator);
-	        
-	   
-	       
 	    }
 
 

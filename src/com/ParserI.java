@@ -1,7 +1,11 @@
 package com;
 
+import java.io.File;
+import java.util.ArrayList;
+
 public interface ParserI
 {
-	public void parseCPP();
-	public void parseH();
+	ArrayList<String> parseMakefile(File inputFile);
+	ArrayList<String>  parseTestFixture(File inputFile);
+	ArrayList<String> parseUnitTest(File inputFile);
 }

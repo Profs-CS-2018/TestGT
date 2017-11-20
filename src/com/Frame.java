@@ -1,10 +1,5 @@
 package com;
 
-/**
- * Imported Libraries
- * 
- * 
- * */
 import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Cursor;
@@ -39,6 +34,8 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.beans.*;
 
 
@@ -66,9 +63,11 @@ public class Frame extends JFrame{
     
     //Text Areas
     private JTextField textFieldSave;
-    private  JTextField addSaveTo;
+    private JTextField addSaveTo;
     private JTextField textField;
     private JTextArea  failure;
+    private JTextArea previewTextArea;
+    private JTextField addFileInput;
     
     //Check Boxes
     private JCheckBox allFiles;
@@ -101,13 +100,11 @@ public class Frame extends JFrame{
    
 	/**
 	 * 
-	 * @param title
+	 * @param title The title is the Name of the Window Application.
 	 */
     public Frame(String title)
     {
-    	/**
-    	 * Name the Frame
-    	 */
+        //Name the Window Application.
     	super(title);
     	createFrame();
     	createContent();
@@ -115,9 +112,8 @@ public class Frame extends JFrame{
     	createButtonControls();
     	
     //	java.net.URL url = ClassLoader.getSystemResource("src/asrc.gif");
-    	/**
-         * Changes the default theme of JFileChooser
-         */
+
+        //Set the Window Application Look and Feel.
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         }
@@ -158,12 +154,12 @@ public class Frame extends JFrame{
     	
     	path = "";
     	
-    	selectedFiles = new ArrayList<File>();
+    	selectedFiles = new ArrayList<>();
     	
-    fixedLabel = new JLabel("Output Save Destination");
-    fixedLabel.setLabelFor(textFieldSave);
+        fixedLabel = new JLabel("Output Save Destination");
+        fixedLabel.setLabelFor(textFieldSave);
     	
-    textField = new JTextField("C://UnitTest/");
+        textField = new JTextField("C://UnitTest/");
     	textField.setToolTipText("Modify selection paths.");
     	textField.setEditable(true);
     	
@@ -172,7 +168,7 @@ public class Frame extends JFrame{
     	buildApplication();
     }
     	
-    	public void buildApplication()
+    	private void buildApplication()
     	{   
     		allFiles = new JCheckBox("All Files");
         	makeFile	= new JCheckBox("Make File");
@@ -185,7 +181,7 @@ public class Frame extends JFrame{
         	
         	JButton addFile = new JButton("Add File");
         	JButton findFile = new JButton("Search");
-        JButton saveTo = new JButton("Save To");
+            JButton saveTo = new JButton("Save To");
         	
         	JButton submit = new JButton("Submit");
         	JButton cancel	= new JButton("Cancel");
@@ -193,8 +189,8 @@ public class Frame extends JFrame{
         	tabbedPane = new JTabbedPane();
         	
         	JPanel filePanel = new JPanel();
-        JPanel previewPanel = new JPanel();
-        JPanel errorPanel = new JPanel();
+            JPanel previewPanel = new JPanel();
+            JPanel errorPanel = new JPanel();
         	JPanel sideBtnPanel = new JPanel();
         	JPanel btmBtnPanel = new JPanel();
         	JPanel northContainer = new JPanel();
@@ -208,7 +204,7 @@ public class Frame extends JFrame{
         	JPanel imagePanel = new JPanel();
         	
         	addSaveTo = new JTextField("Type Save To Location Here");  
-        	JTextField addFileInput = new JTextField("Type Filename Here");
+        	addFileInput = new JTextField("Type Filename Here");
         	JTextField addDirectoryInput = new JTextField("Type Search Directory Here");       	
         	
         	//Border Layout Display Panels
@@ -235,7 +231,7 @@ public class Frame extends JFrame{
         	togglePanel.setVisible(true);
         	togglePanel.add(allFiles);
         	togglePanel.add(makeFile);
-        togglePanel.add(testFixture);
+            togglePanel.add(testFixture);
         	togglePanel.add(unitTest);
         	
         	
@@ -247,8 +243,7 @@ public class Frame extends JFrame{
         tabbedPane.addTab("Errors", errorPanel);
         //sideBtnPanel.add(browse);
         //sideBtnPanel.add(preview);
-        
-       
+
         fileInputPanel.add(addSaveTo);
         fileInputPanel.add(saveTo);
         fileInputPanel.add(addFileInput);
@@ -282,6 +277,7 @@ public class Frame extends JFrame{
     	cancel.addActionListener(e -> close());
     	submit.addActionListener(e -> submit());
     	saveTo.addActionListener(e -> saveTo());
+    	addFile.addActionListener(e -> search());
     	
     	//Adding Check Box Listeners
     	allFiles.addActionListener(e -> allFilesChecked());
@@ -442,9 +438,36 @@ public class Frame extends JFrame{
     }
     }
     
-    public void search()
+    public void search() {
+        File addedFile = findFile(addFileInput.getText(), new File(System.getProperty("user.name")));
+        boolean fileExists = (addedFile != null);
+        if (fileExists) {
+            dm.addElement(addedFile.getAbsolutePath());
+        } else {
+            int input = JOptionPane.showOptionDialog(null, "File Not Found", "Error Message", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE, null, null, null);
+            if (input == JOptionPane.OK_OPTION) {
+                addFileInput.setText("");
+            } else {
+            }
+        }
+    }
+
+    public File findFile(String name, File file)
     {
-    	
+        File returnValue = null;
+        File[] list = file.listFiles();
+        System.out.println(list);
+        if(list != null) {
+            for (File fil : list) {
+                System.out.println(fil.toString());
+                if (fil.isDirectory()) {
+                    returnValue = findFile(name, fil);
+                } else if (name.equals(fil.getName())) {
+                    returnValue = fil;
+                }
+            }
+        }
+        return returnValue;
     }
     
     public void preview()
@@ -524,9 +547,6 @@ public class Frame extends JFrame{
                 textFieldSave.setText(file.getAbsolutePath());
                 try{
                     FileWriter newFile = new FileWriter(file.getPath());
-                    //fw.write(content);
-                    //fw.flush();
-                    //fw.close();
                 }
                 catch(Exception e1)
                 {
